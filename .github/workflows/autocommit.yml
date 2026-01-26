@@ -1,0 +1,56 @@
+name: Auto Commit Daily
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 0 * * *" # runs once per day at 00:00 UTC (change as needed)
+
+permissions:
+  contents: write
+
+jobs:
+  autocommit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          persist-credentials: true
+
+      - name: Random delay (0-59 minutes)
+        run: |
+          # random delay helps spread commits across time
+          delay=$(( RANDOM % 3600 ))
+          echo "Sleeping for ${delay}s"
+          sleep ${delay}
+
+      - name: Make a random number of commits (1-20)
+        env:
+          GIT_COMMITTER_NAME: "Miranto"
+          GIT_COMMITTER_EMAIL: "rantolanja@gmail.com"
+          GIT_AUTHOR_NAME: "Miranto"
+          GIT_AUTHOR_EMAIL: "rantolanja@gmail.com"
+        run: |
+          set -euo pipefail
+          # choose a random count between 1 and 20
+          COUNT=$(( (RANDOM % 20) + 1 ))
+          echo "Will create $COUNT commit(s) this run"
+          git config user.name "${GIT_COMMITTER_NAME}"
+          git config user.email "${GIT_COMMITTER_EMAIL}"
+
+          for i in $(seq 1 $COUNT); do
+            RAND_STR=$(tr -dc 'A-Za-z0-9' </dev/urandom | head -c 12 || echo $RANDOM)
+            TS=$(date -u +"%Y-%m-%d %H:%M:%S UTC")
+            echo "$TS - autocommit $i/$COUNT - $RAND_STR" >> .autocommit_log
+            git add .autocommit_log
+            git commit -m "Auto commit ($i/$COUNT): $TS $RAND_STR" || true
+            git push || true
+
+            # random short sleep between commits to spread them (5-300s)
+            if [ $i -lt $COUNT ]; then
+              SLEEP=$(( (RANDOM % 296) + 5 ))
+              echo "Sleeping ${SLEEP}s before next commit"
+              sleep ${SLEEP}
+            fi
+          done
