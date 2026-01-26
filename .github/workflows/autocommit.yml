@@ -27,10 +27,10 @@ jobs:
 
       - name: Make a random number of commits (1-20)
         env:
-          GIT_COMMITTER_NAME: "Miranto"
-          GIT_COMMITTER_EMAIL: "rantolanja@gmail.com"
-          GIT_AUTHOR_NAME: "Miranto"
-          GIT_AUTHOR_EMAIL: "rantolanja@gmail.com"
+          GIT_COMMITTER_NAME: "Zava07"
+          GIT_COMMITTER_EMAIL: "ajoary1@gmail.com"
+          GIT_AUTHOR_NAME: "Zava07"
+          GIT_AUTHOR_EMAIL: "ajoary1@gmail.com"
         run: |
           set -euo pipefail
           # choose a random count between 1 and 20
